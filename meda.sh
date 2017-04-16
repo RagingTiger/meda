@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # globals
-refs_dir='.meda/refs'
-content_dir='.meda/content'
+meda_dir='.meda'
+refs_dir="${meda_dir}/refs"
+content_dir="${meda_dir}/content"
 
 # funcs
 walk_fs() {
@@ -11,10 +12,46 @@ walk_fs() {
   :
 }
 
+create_repo_dirs() {
+  # create dirs for repo
+  mkdir -p "$1/${refs_dir}" && mkdir -p "$1/${content_dir}" || exit
+}
+
+reinitialize() {
+  # delete refs/content
+  rm -rf "${1:?}/${refs_dir}" && rm -rf "${1:?}/${content_dir}"
+
+  # recreate dirs
+  create_repo_dirs "$1"
+}
+
+create_repo() {
+  # check existing .meda repo
+  repo_exists "$1"
+
+  # create
+  create_repo_dirs "$1"
+  echo "New meda repo initialized ..."
+}
+
 repo_exists(){
   # check for .meda repo
-  # TODO
-  :
+  if [[ -d "$1/${meda_dir}" ]]; then
+    # ask what to do
+    answer=
+    echo -n "Meda repo already exists. Reinitialize? [Y/n]: "
+    read answer
+
+    # check answer
+    case "$answer" in
+      Y) reinitialize "$1"; exit ;;
+      *) exit ;;
+    esac
+
+  # check for nested .meda repo
+  elif [[ "$1" = *"${meda_dir}"* ]]; then
+    echo "Cannot nest meda repos" && exit
+  fi
 }
 
 print_refs() {
@@ -25,13 +62,11 @@ print_refs() {
 
 meda_init() {
   # check if .meda repo exists
-  # TODO
-
-  # check if arg 2 is a dir
-  # TODO
-
-  # create
-  mkdir -p "${refs_dir}" && mkdir -p "${content_dir}" || exit
+  if [[ -z "$1" ]]; then
+    create_repo "$PWD"
+  else
+    create_repo "$1"
+  fi
 }
 
 
