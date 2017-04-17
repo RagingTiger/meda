@@ -69,13 +69,28 @@ meda_init() {
   fi
 }
 
+meda_add() {
+  # need to sanitize ref argument
+  # TODO
+  local path
+  path="$1"
+
+  # hash sanitized ref path
+  local ref_hash
+  ref_hash="$(echo "${path}" | shasum)"
+
+  # check if file exists
+  # TODO
+  echo "${ref_hash}"
+}
+
 
 # main interface
 if [ -z "$1" ]; then
   print_refs
 else
   case "$1" in
-    add) : ;;
+    add) meda_add "$2" ;;
     init) meda_init "$2" ;;
   esac
 fi
