@@ -35,12 +35,25 @@ create_repo() {
 }
 
 repo_find() {
-  # control flow
-  if [[ "$1" == "/" ]]; then
-    exit
-  elif [[ -d "$1/${meda_dir:?}" ]]; then
-    echo "$1"
-  fi
+  # get path
+  local parent_dir
+  parent_dir="$1"
+
+  # start loop
+  while : ; do
+    # control flow
+    if [[ "${parent_dir}" == "/" ]]; then
+      exit
+    elif [[ -d "${parent_dir}/${meda_dir}" ]]; then
+      break
+    else
+      # get dirname
+      parent_dir="$(dirname ${parent_dir})"
+    fi
+  done
+
+  # return
+  echo "${parent_dir}"
 }
 
 repo_exists(){
@@ -82,11 +95,16 @@ meda_add() {
   # need to sanitize ref argument
   # TODO
   local path
-  path="$1"
+  path="$(repo_find $PWD)"
+
+  # test that path exists
+  if [[ ! -e "${path}/$1" ]]; then
+    echo "Path to file/directory not found"; exit
+  fi
 
   # hash sanitized ref path
   local ref_hash
-  ref_hash="$(echo "${path}" | shasum)"
+  ref_hash="$(echo "${path}/$1" | shasum)"
 
   # check if file exists
   # TODO
