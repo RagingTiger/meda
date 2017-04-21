@@ -34,6 +34,15 @@ create_repo() {
   echo "New meda repo initialized ..."
 }
 
+repo_find() {
+  # control flow
+  if [[ "$1" == "/" ]]; then
+    exit
+  elif [[ -d "$1/${meda_dir:?}" ]]; then
+    echo "$1"
+  fi
+}
+
 repo_exists(){
   # check for .meda repo
   if [[ -d "$1/${meda_dir}" ]]; then
